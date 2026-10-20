@@ -3,7 +3,7 @@ import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gsta
 import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
 const $ = (id) => document.getElementById(id);
-const defaults = { firebaseApiKey:"", firebaseAuthDomain:"", firebaseProjectId:"", firebaseAppId:"", backendUrl:"http://localhost:3000" };
+const defaults = { firebaseApiKey:"", firebaseAuthDomain:"", firebaseProjectId:"", firebaseAppId:"", backendUrl:"https://parakeet-interview-copilot.onrender.com" };
 let settings = { ...defaults, ...JSON.parse(localStorage.getItem("copilotSettings") || "{}") };
 let app, auth, db, user = null, recognition = null, micOn = false, systemStream = null;
 let currentTranscript = "", answerText = "", sessionId = crypto.randomUUID(), history = [];
@@ -182,7 +182,7 @@ $("newSessionBtn").addEventListener("click",()=>{stopAll();sessionId=crypto.rand
 $("historyNav").addEventListener("click",()=>$("historyPanel").scrollIntoView({behavior:"smooth"}));
 $("settingsBtn").addEventListener("click",openSettings);
 $("saveSettingsBtn").addEventListener("click",async()=>{
-  settings={firebaseApiKey:$("fbApiKey").value.trim(),firebaseAuthDomain:$("fbAuthDomain").value.trim(),firebaseProjectId:$("fbProjectId").value.trim(),firebaseAppId:$("fbAppId").value.trim(),backendUrl:$("backendUrl").value.trim()||"http://localhost:3000"};
+  settings={firebaseApiKey:$("fbApiKey").value.trim(),firebaseAuthDomain:$("fbAuthDomain").value.trim(),firebaseProjectId:$("fbProjectId").value.trim(),firebaseAppId:$("fbAppId").value.trim(),backendUrl:$("backendUrl").value.trim()||"https://parakeet-interview-copilot.onrender.com"};
   localStorage.setItem("copilotSettings",JSON.stringify(settings)); $("settingsDialog").close(); $("authStatus").textContent="Reloading Firebase…"; location.reload();
 });
 $("copyBtn").addEventListener("click",async()=>{try{await navigator.clipboard.writeText(answerText);$("copyBtn").textContent="Copied";setTimeout(()=>$("copyBtn").textContent="Copy",1200);}catch(e){setStatus("Clipboard unavailable");}});
