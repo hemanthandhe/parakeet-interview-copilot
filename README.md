@@ -1,88 +1,117 @@
-# Interview Copilot — plain HTML, CSS, JavaScript
 
-A Parakeet AI-inspired interview assistant with microphone transcription (where supported), optional screen/tab audio capture, Gemini-generated answers, speech playback, and Firebase/Firestore question history.
+# Parakeet Interview Copilot
+
+A Parakeet AI-inspired interview assistant built with HTML, CSS, JavaScript, Node.js, Express, Groq API, and optional Firebase/Firestore history.
+
+## Features
+
+- Microphone speech recognition (browser-supported)
+- Type interview questions and generate AI answers
+- Groq-powered interview guidance
+- Read answers aloud and copy them
+- Optional Firebase/Firestore question history
+- Responsive dark UI
 
 ## Requirements
 
 - Node.js 18+ (20+ recommended)
-- Google Gemini API key
-- Firebase project (optional for local AI use; required for cloud history)
-- Chrome or Edge recommended for browser speech recognition and screen/tab sharing
+- Groq API key
+- Firebase project (optional)
+- Chrome or Edge recommended for speech recognition
 
-## 1. Start the backend
+## 1. Install dependencies
 
 ```bash
 npm install
-cp .env.example .env
 ```
 
-Edit `.env` and set `GEMINI_API_KEY`. Keep this file private; do not commit it or paste the key into frontend code.
+## 2. Configure environment variables
+
+Create a local `.env` file in the project root:
+
+```env
+GROQ_API_KEY=your_groq_api_key
+GROQ_MODEL=openai/gpt-oss-20b
+PORT=3000
+ALLOWED_ORIGIN=http://localhost:5500
+```
+
+Get your API key from [Groq Console](https://console.groq.com/keys).
+
+Keep `.env` private. Never commit your API key or put it in frontend JavaScript.
+
+## 3. Start the backend
 
 ```bash
 npm start
 ```
 
-The API runs at `http://localhost:3000`. Test `http://localhost:3000/api/health`.
+The backend runs at:
 
-## 2. Serve the frontend
+`http://localhost:3000`
 
-Do not open `index.html` as a `file://` URL. In a second terminal, from this folder, run:
+## 4. Start the frontend
+
+Open a second terminal in the project folder and run:
 
 ```bash
 npx serve -l 5500 .
 ```
 
-Then open `http://localhost:5500`. If your frontend uses another origin, update `ALLOWED_ORIGIN` in `.env` and restart the backend.
+Then open:
 
-## 3. Configure Firebase history
+`http://localhost:5500`
 
-1. Create a project in the Firebase console.
-2. Add a Web App and copy its `apiKey`, `authDomain`, `projectId`, and `appId`.
-3. In Firebase Authentication → Sign-in method, enable **Anonymous**.
+Keep both servers running while testing locally.
+
+## 5. Optional Firebase setup
+
+1. Create a project in the [Firebase Console](https://console.firebase.google.com/).
+2. Add a Web App and copy its configuration.
+3. Enable Anonymous Authentication if your app uses it.
 4. Create a Cloud Firestore database.
-5. In Firestore Rules, publish the contents of `firestore.rules`.
-6. In the app, open the gear icon and enter the Firebase web-app settings, plus backend URL `http://localhost:3000`.
-7. Save; the page reloads and signs in anonymously. Question history will be saved under `users/{anonymousUid}/interviewQuestions`.
+5. Publish the rules from `firestore.rules`.
+6. Enter the Firebase settings in the app's settings panel.
 
-Firebase web configuration is not a server secret. Security comes from Authentication and Firestore rules. Do not use open rules such as `allow read, write: if true`.
+Use Firebase Authentication and secure Firestore rules. Never use unrestricted database rules in production.
 
 ## How to use
 
-1. Select the interview role, answer style, and experience level.
-2. Click **Start mic** and grant microphone permission. Speak a question; stable speech segments are transcribed and likely questions trigger an AI answer.
-3. You can type a question and press Enter or click **Ask AI**.
-4. Use **Read aloud**, **Copy**, **Export JSON**, or review recent questions.
-5. Click **Share audio** to select a tab/window/screen and enable audio sharing when your browser offers it. Click **Stop all** when finished.
+1. Open the app in your browser.
+2. Type an interview question or start the microphone.
+3. Click **Ask AI** to generate an answer.
+4. Use **Read aloud** or **Copy** as needed.
+5. Configure Firebase if you want cloud question history.
 
-## Browser audio limitations — important
+## Browser audio limitations
 
-- `getDisplayMedia({audio:true, video:true})` requires a secure context (localhost is allowed), a user gesture, and explicit user selection. The browser may provide no audio track if the user does not choose a compatible source or enable audio sharing.
-- The app checks for a returned system-audio track, but **does not transcribe system audio**. The Web Speech API does not expose a way to feed an arbitrary `MediaStream` into `SpeechRecognition`; it usually recognizes microphone input. This app's working transcription path is microphone speech recognition plus manually typed questions.
-- For true system-audio transcription, add a dedicated streaming speech-to-text service. A production implementation should capture short audio chunks from the shared stream (for example via Web Audio/AudioWorklet and MediaRecorder where supported), stream them to an authenticated backend, and use a provider that accepts streaming audio. Handle chunking, latency, reconnects, language selection, consent, and data retention carefully. Do not assume that recording an audio track automatically transcribes it.
-- Web Speech API support and behavior vary by browser, platform, permissions, and network. Chrome/Edge are the best initial targets; always keep the manual question input available.
-- Use audio capture only with appropriate consent and in compliance with interview, workplace, and meeting policies.
+- Microphone access requires browser permission.
+- Speech recognition support varies by browser and operating system.
+- Screen/tab audio capture does not automatically provide speech transcription.
+- Use audio capture only with appropriate consent and in accordance with interview, workplace, and meeting policies.
 
-## Security and deployment
+## Deployment and security
 
-- Gemini key stays in backend `.env`; frontend sends questions to `/api/answer`, never to Gemini directly.
-- Set `ALLOWED_ORIGIN` to your exact production frontend origin. The sample CORS setting is intended for local development; do not leave broad CORS enabled in production.
-- Add rate limiting, authentication, request logging with redaction, quotas, abuse controls, and TLS before public deployment.
-- Do not put secrets in `app.js`, HTML, or `localStorage`. Firebase web config can be in the browser, but access must be secured by Auth + Firestore rules.
-- Anonymous Firebase accounts can be abused if rules and quotas are misconfigured. Consider account linking or a proper sign-in flow before production.
-- This is a starter project, not a complete security-reviewed production service.
+- The Groq API key must remain on the backend in `.env`.
+- Set `ALLOWED_ORIGIN` to your actual frontend domain in production.
+- Configure `GROQ_API_KEY` and `GROQ_MODEL` as environment variables in your backend hosting service.
+- Never upload `.env`, API keys, or `node_modules` to GitHub.
+- Add appropriate authentication, rate limiting, quotas, and monitoring before public production use.
 
 ## Project files
 
-- `index.html` — app structure
-- `styles.css` — responsive dark UI
-- `app.js` — microphone recognition, UI, Gemini backend calls, Firebase history
-- `server.js` — Express API that keeps Gemini key on the server
-- `firestore.rules` — per-user history access rules
-- `.env.example` — backend environment template
+- `index.html` — application structure
+- `styles.css` — responsive styling
+- `app.js` — frontend behavior and AI requests
+- `server.js` — Express backend and Groq API integration
+- `firestore.rules` — Firestore access rules
+- `.env.example` — environment variable template
 
 ## Troubleshooting
 
-- **AI request failed:** make sure backend is running, `.env` contains a valid Gemini API key, and the selected model is available to your account.
-- **Firebase not configured:** open Settings and enter all four Firebase web-app fields. Enable Anonymous Auth and publish Firestore rules.
-- **No speech detected:** allow microphone access, use Chrome/Edge, check OS microphone permissions, and try speaking in English. Speech recognition may require an internet connection.
-- **No system audio track:** choose a browser tab and tick Share audio if shown. Some OS/browser/source combinations cannot share audio.
+- **401 error:** Check your Groq API key.
+- **404 error:** Check whether the configured model is available.
+- **429 error:** Check your Groq usage limits.
+- **Backend connection error:** Confirm the backend is running and the frontend uses the correct API URL.
+- **Microphone not working:** Allow browser and operating-system microphone permissions.
+
