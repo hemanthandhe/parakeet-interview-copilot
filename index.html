@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Copilot — Interview Assistant</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand"><div class="brand-mark">✦</div><div><strong>copilot</strong><small>INTERVIEW ASSISTANT</small></div></div>
+      <button id="newSessionBtn" class="new-session">＋ New session</button>
+      <div class="side-label">WORKSPACE</div>
+      <button class="nav-item active">◉ <span>Live copilot</span></button>
+      <button class="nav-item" id="historyNav">◷ <span>Question history</span></button>
+      <div class="side-label">SESSION HISTORY</div>
+      <div id="sessionList" class="session-list"><p class="muted small">Your saved sessions will appear here.</p></div>
+      <div class="sidebar-footer"><span class="status-dot"></span><span id="authStatus">Connecting to Firebase…</span></div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div><div class="eyebrow">REAL-TIME ASSISTANCE</div><h1>Interview copilot</h1></div>
+        <div class="top-actions"><span class="pill"><span class="status-dot"></span><span id="sessionStatus">Ready when you are</span></span><button id="settingsBtn" class="icon-btn" title="Settings">⚙</button></div>
+      </header>
+
+      <section class="toolbar panel">
+        <div class="toolbar-field"><label for="roleSelect">INTERVIEW ROLE</label><select id="roleSelect"><option>Frontend Developer</option><option>React.js Developer</option><option>Full Stack Developer</option><option>JavaScript Developer</option><option>Automation QA Engineer</option><option>General HR Interview</option></select></div>
+        <div class="toolbar-field"><label for="answerStyle">ANSWER STYLE</label><select id="answerStyle"><option value="detailed">Detailed + code examples</option><option value="concise">Concise and natural</option><option value="simple">Simple English</option></select></div>
+        <div class="toolbar-field"><label for="experience">EXPERIENCE LEVEL</label><select id="experience"><option>Mid-level (3–5 years)</option><option>Entry-level</option><option>Senior-level</option></select></div>
+      </section>
+
+      <section class="capture panel">
+        <div class="capture-heading"><div><h2>Audio capture</h2><p class="muted">Choose the audio sources you want to use.</p></div><span id="listeningBadge" class="badge">● NOT LISTENING</span></div>
+        <div class="capture-grid">
+          <div class="source-card"><div class="source-icon">🎙</div><div class="source-copy"><strong>Microphone</strong><p id="micDescription">Transcribes your spoken audio using browser speech recognition.</p><span id="micState" class="source-state">Not connected</span></div><button id="micBtn" class="button primary">Start mic</button></div>
+          <div class="source-card"><div class="source-icon">▣</div><div class="source-copy"><strong>Computer audio</strong><p>Share a browser tab or screen and enable “Share audio” when offered.</p><span id="systemState" class="source-state">Not connected</span></div><button id="systemBtn" class="button secondary">Share audio</button></div>
+        </div>
+        <div class="notice">Browser limitation: Web Speech API usually listens to the microphone, not an arbitrary shared system-audio stream. System audio capture below verifies and holds the shared stream, but does not transcribe it. See README for adding a dedicated speech-to-text service.</div>
+        <div class="capture-bottom"><div class="wave" id="wave"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><span id="captureMessage">Audio capture is off</span><button id="stopAllBtn" class="button danger" disabled>Stop all</button></div>
+      </section>
+
+      <div class="content-grid">
+        <section class="panel transcript-panel">
+          <div class="panel-heading"><div><h2>Live transcript</h2><p class="muted">Recognized speech appears here.</p></div><button id="clearTranscriptBtn" class="text-button">Clear</button></div>
+          <div id="transcript" class="transcript"><div class="empty-state"><div class="empty-icon">⌁</div><strong>Waiting for speech</strong><p>Start the microphone, then speak a question.</p></div></div>
+          <div class="manual-question"><input id="questionInput" placeholder="Or type an interview question…" maxlength="2000"><button id="askBtn" class="button primary">Ask AI ↗</button></div>
+        </section>
+        <section class="panel answer-panel">
+          <div class="panel-heading"><div><h2>Suggested answer</h2><p class="muted">AI-generated interview guidance</p></div><span class="ai-tag">✦ GEMINI</span></div>
+          <div id="answer" class="answer-content"><div class="empty-state"><div class="empty-icon">✧</div><strong>Your answer will appear here</strong><p>Questions detected from speech or entered manually will be answered here, with technical details and code when useful.</p></div></div>
+          <div class="answer-footer"><span id="answerMeta">Not generated yet</span><div><button id="speakBtn" class="button secondary" disabled>▶ Read aloud</button><button id="copyBtn" class="button secondary" disabled>Copy</button></div></div>
+        </section>
+      </div>
+      <section class="panel history-panel" id="historyPanel"><div class="panel-heading"><div><h2>Recent questions</h2><p class="muted">Saved to Firestore when Firebase is configured.</p></div><button id="exportBtn" class="text-button">Export JSON</button></div><div id="historyList" class="history-list"><p class="muted">No questions saved in this session yet.</p></div></section>
+      <footer>Use this tool for interview preparation and permitted assistance. Follow meeting, interview, and recording consent rules.</footer>
+    </main>
+  </div>
+
+  <dialog id="settingsDialog" class="settings-dialog">
+    <form method="dialog"><div class="panel-heading"><div><h2>Connection settings</h2><p class="muted">Firebase config is public client configuration; protect your data with security rules.</p></div><button class="icon-btn" aria-label="Close">✕</button></div>
+      <label>Firebase API key <input id="fbApiKey" autocomplete="off" placeholder="AIza…"></label>
+      <label>Auth domain <input id="fbAuthDomain" placeholder="your-project.firebaseapp.com"></label>
+      <label>Project ID <input id="fbProjectId" placeholder="your-project-id"></label>
+      <label>App ID <input id="fbAppId" placeholder="1:…:web:…"></label>
+      <label>Backend URL <input id="backendUrl" placeholder="http://localhost:3000"></label>
+      <p class="muted small">Firebase settings are stored in this browser. Gemini API key belongs only in the backend .env file, never here.</p>
+      <div class="dialog-actions"><button id="saveSettingsBtn" type="button" class="button primary">Save settings</button><button class="button secondary">Close</button></div>
+    </form>
+  </dialog>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

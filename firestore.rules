@@ -1,0 +1,11 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Anonymous users may read/write only their own interview history.
+    // Enable Firebase Authentication's Anonymous provider before using this app.
+    match /users/{userId}/interviewQuestions/{questionId} {
+      allow read, create: if request.auth != null && request.auth.uid == userId;
+      allow update, delete: if false;
+    }
+  }
+}
